@@ -107,7 +107,11 @@ def generate(fileprefix):
             clause4 = clause4 + l
 
 
+    numVar = n*K # right now
+    writeSatInput(filename, clause, numVar)
 
+def writeSatInput(filename, clause, numVar):
+    pass
 
 
 
