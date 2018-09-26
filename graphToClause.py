@@ -6,7 +6,7 @@ import sys
 # Variable numbering in minsat starts with 1
 # i, j is node, sub-graph number
 def get1Dindex(i, j, k):
-    return (i*k + j + 1)
+    return (i*k + j)
 
 # Variable numbering in minsat starts with 1
 def get2Dindex(idx, k):
@@ -54,6 +54,7 @@ def generate(fileprefix):
     
     # variableMatrix[n][K] represents whether node n is present in k'th graph
     # variableMatrix = [[False for i in range(n)] for j in range(K)]
+
 
     for i in range(n):
         l = []
@@ -130,7 +131,7 @@ def writeSatInput(fileprefix, clause, numVar):
             for term in exp:
                 if (not term[0]):
                     st += "-" 
-                st += str(term[1]) + " "
+                st += str(term[1]+1) + " "
             
             st += "0\n"
             outfile.write(st)
