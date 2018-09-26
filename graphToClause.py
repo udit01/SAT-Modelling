@@ -1,6 +1,5 @@
-from sympy import *
-import argparse
-
+# from sympy import *
+# import argparse
 
 # Variable numbering in minsat starts with 1
 # i, j is node, sub-graph number
@@ -15,11 +14,9 @@ def get2Dindex(idx, k):
     return i,j
 
 def generate(fileprefix):
-    
-    # Construct graph from INPUT
 
-    adj = [[]] 
-    # adj list representation 0th element is dummy and nodes indexed from 1
+
+    # Construct graph from INPUT
     edgelist = []
     # fileprefix = "test"
     with open(fileprefix+".graph","r") as infile:
@@ -31,16 +28,11 @@ def generate(fileprefix):
         K = int(pars[2])
 
         for i in range(edges):
-            adj.append([])
-        for i in range(edges):
             line = infile.readline()
             spl = line.split(" ")
             n1 = int(spl[0])
             n2 = int(spl[2])
             edgelist.append([n1,n2])
-    #         edgelist.append([n2,n1])
-            adj[n1].append(n2)
-            adj[n2].append(n1)
 
             edgeMatrix[n1][n2] = True
             edgeMatrix[n2][n1] = True
@@ -71,14 +63,14 @@ def generate(fileprefix):
                 l = []
                 for t in range(K):
                     l.append( [(True, get1Dindex(i, t, K)), [True, get1Dindex(j, t, K)]] )
-                
                 clause2 = clause2 + l
 
-
+    # numVar is the index of next free variable
+    numVar = n*K + 1
+    clause2, numVar = to_cnf(clause2, numVar)
 
 
     clause3 = []
-
     # i and j are nodes and t is subgraph
     for i in range(n):
         for j in range(n):
@@ -107,10 +99,42 @@ def generate(fileprefix):
             clause4 = clause4 + l
 
 
-    numVar = n*K # right now
+    # numVar is the index of next free variable
+    clause2, numVar = to_cnf(clause2, numVar)
+
     writeSatInput(filename, clause, numVar)
 
-def writeSatInput(filename, clause, numVar):
+def to_cnf(dnf_clause, free_var_num):
+    outl = []
+    num_ands = len(dnf_clause)
+    tmpl = []
+    for i in range(num_ands):
+        tmpl.append((True, free_var_num+i))
+    outl.append(tmpl)
+    for i in len(dnf_clause):
+        for var in dnf_clause[i]:
+            outl.append([(False, free_var_num + i),var])
+    
+    return ( outl, free_var_num + len(dnf_clauses))
+
+
+def get_out(sat_out_file, num_vars):
+    with open(sat_out_file,"r") as sat_out:
+    issat = sat_out.readline()
+    if issat != "SAT":
+        print("Invalid output")
+        exit(-1)
+    sol  = sat_out.read_line()
+        assign = sol.split(" ")
+    assign = assign[:-1] # check that this removes 0 only
+    assignments = []
+    for i in range(num_vars):
+        if assign[i][0]=="-":
+        assignments.append(False)
+        else:
+        assignments.append(True)   
+        
+def writeSatInput(fileprefix, clause, numVar):
     pass
 
 
