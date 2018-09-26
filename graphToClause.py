@@ -50,25 +50,49 @@ def generate(fileprefix):
 
     for i in range(n):
         l = []
-
         for j in range(K):
             l.append((True, get1Dindex(i,j,K)))
-        
+        # element wise append 
         clause1.append(l)
     
     
     clause2 = []
 
+    # i and j are nodes and t is subgraph
     for i in range(n):
         for j in range(n):
+            if i == j:
+                continue
             if(not edge[i][j]):
                 l = []
                 for t in range(K):
                     l.append([(False, get1Dindex(i, t, K)), (False, get1Dindex(j, t, K) )])
-                clause2.append(l)
-                
+                # concat l with clause2
+                clause2 = clause2 + l
+    
+
+    # DNF TYPE , or of 2 and's (x1^x2) V (x3^x4) V ...
+    clause3 = []
+
+    # i and j are subgraphs
+    for i in range(K):
+        for j in range(K):
+            if i == j:
+                continue
+            l = []
+            for node in range(n):
+                l.append([(True, get1Dindex(node, i, K)), (False, get1Dindex(node, j, K))])
+            # concat l with clause3
+            clause3 = clause3 + l
 
     
+
+
+
+
+                
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Taking graph input')
     parser.add_argument('-f', dest='fileprefix', help='The file path', required = True, type=str)
