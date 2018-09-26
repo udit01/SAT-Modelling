@@ -26,6 +26,7 @@ def generate(fileprefix):
         first = infile.readline()
         pars = first.split(" ")
         n = int(pars[0])
+        edgeMatrix = [[False for x in range(n)] for y in range(n)] 
         edges = int(pars[1])
         K = int(pars[2])
 
@@ -40,6 +41,9 @@ def generate(fileprefix):
     #         edgelist.append([n2,n1])
             adj[n1].append(n2)
             adj[n2].append(n1)
+
+            edgeMatrix[n1][n2] = True
+            edgeMatrix[n2][n1] = True
     
     # A clause is a list of (list of tuples)
     # Tuples of (Bool, number) where 
@@ -63,7 +67,7 @@ def generate(fileprefix):
         if j in range(n):
             if i == j:
                 continue
-            if (edge[i][j]):
+            if (edgeMatrix[i][j]):
                 l = []
                 for t in range(K):
                     l.append( [(True, get1Dindex(i, t, K)), [True, get1Dindex(j, t, K)]] )
@@ -80,7 +84,7 @@ def generate(fileprefix):
         for j in range(n):
             if i == j:
                 continue
-            if(not edge[i][j]):
+            if(not edgeMatrix[i][j]):
                 l = []
                 for t in range(K):
                     l.append([(False, get1Dindex(i, t, K)), (False, get1Dindex(j, t, K) )])
