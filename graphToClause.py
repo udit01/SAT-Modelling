@@ -10,7 +10,8 @@ def get1Dindex(i, j, k):
 
 # Variable numbering in minsat starts with 1
 def get2Dindex(idx, k):
-    idx = idx - 1
+    # can treat it as var starting from 0
+    # idx = idx - 1
     i = idx // k
     j = idx - i*k
     return i,j
@@ -108,9 +109,7 @@ def generate(fileprefix):
 
     # numVar is the index of next free variable
     clause4, numVar = to_cnf(clause4, numVar)
-
     clause = clause1 + clause2 + clause3 + clause4
-
     writeSatInput(fileprefix, clause, numVar-1)
 
 def writeSatInput(fileprefix, clause, numVar):
@@ -148,8 +147,8 @@ def to_cnf(dnf_clause, free_var_num):
     return ( outl, free_var_num + len(dnf_clause))
 
 
-def get_out(sat_out_file, num_vars):
-    with open(sat_out_file,"r") as sat_out:
+def get_out(fileprefix, num_vars):
+    with open(fileprefix+".satoutput","r") as sat_out:
         issat = sat_out.readline()
         if issat != "SAT":
             print("Invalid output")
@@ -163,8 +162,22 @@ def get_out(sat_out_file, num_vars):
                 assignments.append(False)
             else:
                 assignments.append(True)   
+    
+    return assignments
         
 
+def out(fileprefix):
+
+    edgeList, edgeMatrix, n, K, edges = getInput(fileprefix)
+    assignments = get_out(fileprefix, n*K)
+
+    variableMatrix = [[False for i in range(K)] for j in range(n)]
+
+    for t in range(len(assignments)):
+        i, j = get2Dindex(t, K)
+        variableMatrix[i][j] = assignments[t]
+
+    
 if __name__ == "__main__":
 
 
@@ -179,7 +192,7 @@ if __name__ == "__main__":
     if mode == 0:
         generate(fileprefix)
     else:
-
+        out(fileprefix)
     
     # Output in x.satinput and x.satouput 
 
