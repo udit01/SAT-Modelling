@@ -56,12 +56,19 @@ def generate(fileprefix):
         
         clause1.append(l)
     
+    
     clause2 = []
 
     for i in range(n):
         for j in range(n):
-            pass
+            if(not edge[i][j]):
+                l = []
+                for t in range(K):
+                    l.append([(False, get1Dindex(i, t, K)), (False, get1Dindex(j, t, K) )])
+                clause2.append(l)
+                
 
+    
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Taking graph input')
     parser.add_argument('-f', dest='fileprefix', help='The file path', required = True, type=str)
