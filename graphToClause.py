@@ -33,9 +33,12 @@ def getInput(fileprefix):
             line = infile.readline()
             spl = line.split(" ")
             n1 = int(spl[0])
-            n2 = int(spl[2])
+            n2 = int(spl[1])
+            n1 -= 1
+            n2 -= 1
             edgelist.append([n1,n2])
 
+            # print(n1, n2)
             edgeMatrix[n1][n2] = True
             edgeMatrix[n2][n1] = True
 
@@ -59,39 +62,41 @@ def generate(fileprefix):
         # element wise append 
         clause1.append(l)
     
+    # print("Printing clause1" , clause1)
     
     # DNF TYPE , or of 2 and's (x1^x2) V (x3^x4) V ...
     clause2 = []
 
+    # print("EDGE MATRIX", edgeMatrix)
     for i in range(n):
-        if j in range(n):
-            if i == j:
-                continue
+        for j in range(i+1, n):
             if (edgeMatrix[i][j]):
                 l = []
                 for t in range(K):
-                    l.append( [(True, get1Dindex(i, t, K)), [True, get1Dindex(j, t, K)]] )
+                    l.append( [(True, get1Dindex(i, t, K)), (True, get1Dindex(j, t, K))] )
                 clause2 = clause2 + l
 
     # numVar is the index of next free variable
     numVar = n*K + 1
+    # print('Printing edge matrix', edgeMatrix)
+    # print("Printing clause 2 ---- " , clause2)
     clause2, numVar = to_cnf(clause2, numVar)
+    # print("Printing clause 2 ---- " , clause2)
 
 
     clause3 = []
     # i and j are nodes and t is subgraph
     for i in range(n):
-        for j in range(n):
-            if i == j:
-                continue
+        for j in range(i+1,n):
+            l = []
             if(not edgeMatrix[i][j]):
-                l = []
                 for t in range(K):
                     l.append([(False, get1Dindex(i, t, K)), (False, get1Dindex(j, t, K) )])
-                # concat l with clause3
-                clause3 = clause3 + l
+            # concat l with clause3
+            clause3 = clause3 + l
     
 
+    # print("Printing clause3" , clause3)
     # DNF TYPE , or of 2 and's (x1^x2) V (x3^x4) V ...
     clause4 = []
 
@@ -106,6 +111,7 @@ def generate(fileprefix):
             # concat l with clause4
             clause4 = clause4 + l
 
+    # print("Printing clause4" , clause4)
 
     # numVar is the index of next free variable
     clause4, numVar = to_cnf(clause4, numVar)
@@ -117,7 +123,7 @@ def writeSatInput(fileprefix, clause, numVar):
     with open(fileprefix+".satinput","w") as outfile:
         
         string1 = "p cnf %d %d\n" %(numVar, len(clause))
-        outfile.write(string1, end="")
+        outfile.write(string1)
 
         for exp in clause:
             st = ""
@@ -127,7 +133,7 @@ def writeSatInput(fileprefix, clause, numVar):
                 st += str(term[1]) + " "
             
             st += "0\n"
-            outfile.write(st, end="")
+            outfile.write(st)
 
         outfile.close()
 
@@ -140,20 +146,21 @@ def to_cnf(dnf_clause, free_var_num):
         tmpl.append((True, free_var_num+i))
     outl.append(tmpl)
 
-    for i in len(dnf_clause):
+    
+    for i in range(num_ands):
         for var in dnf_clause[i]:
             outl.append([(False, free_var_num + i),var])
     
-    return ( outl, free_var_num + len(dnf_clause))
+    return ( outl, free_var_num + num_ands)
 
 
 def get_out(fileprefix, num_vars):
     with open(fileprefix+".satoutput","r") as sat_out:
         issat = sat_out.readline()
-        if issat != "SAT":
+        if issat != "SAT\n":
             print("0")
             exit(-1)
-        sol  = sat_out.read_line()
+        sol  = sat_out.readline()
         assign = sol.split(" ")
         assign = assign[:-1] # check that this removes 0 only
         assignments = []
@@ -169,8 +176,11 @@ def get_out(fileprefix, num_vars):
 def out(fileprefix):
 
     edgeList, edgeMatrix, n, K, edges = getInput(fileprefix)
-    assignments = get_out(fileprefix, n*K)
+    
+    # print(edgeList, n, K)
 
+    assignments = get_out(fileprefix, n*K)
+    # print("HI----",assignments)
     variableMatrix = [[False for i in range(K)] for j in range(n)]
 
     for t in range(len(assignments)):
@@ -186,7 +196,7 @@ def out(fileprefix):
         for i in range(n):
             if(variableMatrix[i][t]):
                 count -= 1
-                print(i, end="")
+                print(i+1, end="")
                 if(count > 0):
                     print(" ", end="")
         print()

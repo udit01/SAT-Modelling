@@ -1,1 +1,1 @@
-python graphToClause.py $1 1
+python graphToClause.py $1 1 
