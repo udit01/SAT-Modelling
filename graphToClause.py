@@ -1,5 +1,7 @@
 # from sympy import *
 # import argparse
+import sys
+
 
 # Variable numbering in minsat starts with 1
 # i, j is node, sub-graph number
@@ -13,8 +15,7 @@ def get2Dindex(idx, k):
     j = idx - i*k
     return i,j
 
-def generate(fileprefix):
-
+def getInput(fileprefix):
 
     # Construct graph from INPUT
     edgelist = []
@@ -36,7 +37,13 @@ def generate(fileprefix):
 
             edgeMatrix[n1][n2] = True
             edgeMatrix[n2][n1] = True
-    
+
+    return edgelist, edgeMatrix, n, K, edges
+
+
+def generate(fileprefix):
+
+    edgeList, edgeMatrix, n, K, edges = getInput(fileprefix)
     # A clause is a list of (list of tuples)
     # Tuples of (Bool, number) where 
     clause1 = [] 
@@ -100,9 +107,31 @@ def generate(fileprefix):
 
 
     # numVar is the index of next free variable
-    clause2, numVar = to_cnf(clause2, numVar)
+    clause4, numVar = to_cnf(clause4, numVar)
 
-    writeSatInput(filename, clause, numVar)
+    clause = clause1 + clause2 + clause3 + clause4
+
+    writeSatInput(fileprefix, clause, numVar-1)
+
+def writeSatInput(fileprefix, clause, numVar):
+    # 1 to numVar all are varialbes
+    with open(fileprefix+".satinput","w") as outfile:
+        
+        string1 = "p cnf %d %d\n" %(numVar, len(clause))
+        outfile.write(string1)
+
+        for exp in clause:
+            st = ""
+            for term in exp:
+                if (not term[0]):
+                    st += "-" 
+                st += str(term[1]) + " "
+            
+            st += "0\n"
+            outfile.write(st)
+
+        outfile.close()
+
 
 def to_cnf(dnf_clause, free_var_num):
     outl = []
@@ -135,22 +164,23 @@ def get_out(sat_out_file, num_vars):
             else:
                 assignments.append(True)   
         
-def writeSatInput(fileprefix, clause, numVar):
-    pass
-
-
-
-                
-
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Taking graph input')
-    parser.add_argument('-f', dest='fileprefix', help='The file path', required = True, type=str)
+
+
+    # parser = argparse.ArgumentParser(description='Taking graph input')
+    # parser.add_argument('-f', dest='fileprefix', help='The file path', required = True, type=str)
     # parser.add_argument('-o', dest='output', help='Output Prefix', required=True, type=str)
-    args = parser.parse_args()
+    # args = parser.parse_args()
 
-    generate(args.fileprefix)
+    fileprefix = sys.argv[1]
+    mode = int(sys.argv[2])
+    
+    if mode == 0:
+        generate(fileprefix)
+    else:
 
+    
     # Output in x.satinput and x.satouput 
 
 
