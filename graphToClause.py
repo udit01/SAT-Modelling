@@ -56,7 +56,24 @@ def generate(fileprefix):
         clause1.append(l)
     
     
+    # DNF TYPE , or of 2 and's (x1^x2) V (x3^x4) V ...
     clause2 = []
+
+    for i in range(n):
+        if j in range(n):
+            if i == j:
+                continue
+            if (edge[i][j]):
+                l = []
+                for t in range(K):
+                    l.append( [(True, get1Dindex(i, t, K)), [True, get1Dindex(j, t, K)]] )
+                
+                clause2 = clause2 + l
+
+
+
+
+    clause3 = []
 
     # i and j are nodes and t is subgraph
     for i in range(n):
@@ -67,12 +84,12 @@ def generate(fileprefix):
                 l = []
                 for t in range(K):
                     l.append([(False, get1Dindex(i, t, K)), (False, get1Dindex(j, t, K) )])
-                # concat l with clause2
-                clause2 = clause2 + l
+                # concat l with clause3
+                clause3 = clause3 + l
     
 
     # DNF TYPE , or of 2 and's (x1^x2) V (x3^x4) V ...
-    clause3 = []
+    clause4 = []
 
     # i and j are subgraphs
     for i in range(K):
@@ -82,10 +99,10 @@ def generate(fileprefix):
             l = []
             for node in range(n):
                 l.append([(True, get1Dindex(node, i, K)), (False, get1Dindex(node, j, K))])
-            # concat l with clause3
-            clause3 = clause3 + l
+            # concat l with clause4
+            clause4 = clause4 + l
 
-    
+
 
 
 
