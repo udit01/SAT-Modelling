@@ -117,7 +117,7 @@ def writeSatInput(fileprefix, clause, numVar):
     with open(fileprefix+".satinput","w") as outfile:
         
         string1 = "p cnf %d %d\n" %(numVar, len(clause))
-        outfile.write(string1)
+        outfile.write(string1, end="")
 
         for exp in clause:
             st = ""
@@ -127,7 +127,7 @@ def writeSatInput(fileprefix, clause, numVar):
                 st += str(term[1]) + " "
             
             st += "0\n"
-            outfile.write(st)
+            outfile.write(st, end="")
 
         outfile.close()
 
@@ -151,7 +151,7 @@ def get_out(fileprefix, num_vars):
     with open(fileprefix+".satoutput","r") as sat_out:
         issat = sat_out.readline()
         if issat != "SAT":
-            print("Invalid output")
+            print("0")
             exit(-1)
         sol  = sat_out.read_line()
         assign = sol.split(" ")
@@ -177,7 +177,21 @@ def out(fileprefix):
         i, j = get2Dindex(t, K)
         variableMatrix[i][j] = assignments[t]
 
-    
+    for t in range(K):
+        count = 0
+        for i in range(n):
+            if(variableMatrix[i][t]):
+                count+=1
+        print("#%d %d\n"%(t+1, count), end="")
+        for i in range(n):
+            if(variableMatrix[i][t]):
+                count -= 1
+                print(i, end="")
+                if(count > 0):
+                    print(" ", end="")
+        print()
+
+
 if __name__ == "__main__":
 
 
