@@ -1,0 +1,1 @@
+python graphToClause.py -f $2 
