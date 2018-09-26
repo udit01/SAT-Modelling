@@ -111,28 +111,29 @@ def to_cnf(dnf_clause, free_var_num):
     for i in range(num_ands):
         tmpl.append((True, free_var_num+i))
     outl.append(tmpl)
+
     for i in len(dnf_clause):
         for var in dnf_clause[i]:
             outl.append([(False, free_var_num + i),var])
     
-    return ( outl, free_var_num + len(dnf_clauses))
+    return ( outl, free_var_num + len(dnf_clause))
 
 
 def get_out(sat_out_file, num_vars):
     with open(sat_out_file,"r") as sat_out:
-    issat = sat_out.readline()
-    if issat != "SAT":
-        print("Invalid output")
-        exit(-1)
-    sol  = sat_out.read_line()
+        issat = sat_out.readline()
+        if issat != "SAT":
+            print("Invalid output")
+            exit(-1)
+        sol  = sat_out.read_line()
         assign = sol.split(" ")
-    assign = assign[:-1] # check that this removes 0 only
-    assignments = []
-    for i in range(num_vars):
-        if assign[i][0]=="-":
-        assignments.append(False)
-        else:
-        assignments.append(True)   
+        assign = assign[:-1] # check that this removes 0 only
+        assignments = []
+        for i in range(num_vars):
+            if assign[i][0]=="-":
+                assignments.append(False)
+            else:
+                assignments.append(True)   
         
 def writeSatInput(fileprefix, clause, numVar):
     pass
