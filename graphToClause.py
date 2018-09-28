@@ -63,7 +63,7 @@ def generate(fileprefix):
         # element wise append 
         clause1.append(l)
     
-    # print("Printing clause1" , clause1)
+    # print("Printing clause1 ------- " , clause1)
     
     # DNF TYPE , or of 2 and's (x1^x2) V (x3^x4) V ...
     clause2 = []
@@ -80,7 +80,7 @@ def generate(fileprefix):
     # numVar is the index of next free variable
     numVar = n*K + 1
     # print('Printing edge matrix', edgeMatrix)
-    # print("Printing clause 2 ---- " , clause2)
+    # print("Printing clause 2  ------- " , clause2)
     clause2, numVar = to_cnf(clause2, numVar)
     # print("Printing clause 2 ---- " , clause2)
 
@@ -97,7 +97,7 @@ def generate(fileprefix):
             clause3 = clause3 + l
     
 
-    # print("Printing clause3" , clause3)
+    # print("Printing clause3 ------- " , clause3)
     # DNF TYPE , or of 2 and's (x1^x2) V (x3^x4) V ...
     clause4 = []
 
@@ -112,12 +112,33 @@ def generate(fileprefix):
             # concat l with clause4
             clause4 = clause4 + l
 
-    # print("Printing clause4" , clause4)
+    # print("Printing clause4 ------ " , clause4)
 
     # numVar is the index of next free variable
     clause4, numVar = to_cnf(clause4, numVar)
-    clause = clause1 + clause2 + clause3 + clause4
-    writeSatInput(fileprefix, clause, numVar-1)
+    # print("Printing clause4 ------ " , clause4)
+
+    # Clause 5, we thought it was included in previous constraints ?
+    clause5 = []
+
+    for i in range(n):
+        for j in range(i+1,n):
+            l = []
+            if(edgeMatrix[i][j]):
+                # print("PRINTING i, j in clause 5 --- ", i, j)
+                for t in range(K):
+                    # OR of pairwise and
+                    l.append( [(True, get1Dindex(i, t, K)), (True, get1Dindex(j, t, K))] )
+                l, numVar = to_cnf(l,numVar)
+            clause5 = clause5 + l
+
+    # print("Printing clause 5 ----- ", clause5)
+
+    clause = clause1 + clause2 + clause3 + clause4 + clause5
+    
+    # print("Num Var ---- ",numVar)
+
+    writeSatInput(fileprefix, clause, numVar)
 
 def writeSatInput(fileprefix, clause, numVar):
     # 1 to numVar all are varialbes
@@ -131,6 +152,7 @@ def writeSatInput(fileprefix, clause, numVar):
             for term in exp:
                 if (not term[0]):
                     st += "-" 
+                # To make the variables 1 indexed
                 st += str(term[1]+1) + " "
             
             st += "0\n"
@@ -140,6 +162,10 @@ def writeSatInput(fileprefix, clause, numVar):
 
 
 def to_cnf(dnf_clause, free_var_num):
+
+    if (dnf_clause == []):
+        return [], free_var_num
+
     outl = []
     num_ands = len(dnf_clause)
     tmpl = []
@@ -152,7 +178,7 @@ def to_cnf(dnf_clause, free_var_num):
         for var in dnf_clause[i]:
             outl.append([(False, free_var_num + i),var])
     
-    return ( outl, free_var_num + num_ands)
+    return outl, (free_var_num + num_ands)
 
 
 def get_out(fileprefix, num_vars):
@@ -174,20 +200,24 @@ def get_out(fileprefix, num_vars):
     return assignments
         
 
-def out(fileprefix):
 
+# UDIT: I have tested this function (for sample case),
+# this is running as expected [assignments, i&j order etc]  
+def out(fileprefix):
+    
     edgeList, edgeMatrix, n, K, edges = getInput(fileprefix)
     
     # print(edgeList, n, K)
 
     assignments = get_out(fileprefix, n*K)
-    # print("HI----",assignments)
+    # print("Assignments are ----",assignments)
     variableMatrix = [[False for i in range(K)] for j in range(n)]
-
     for t in range(len(assignments)):
         i, j = get2Dindex(t, K)
         variableMatrix[i][j] = assignments[t]
 
+    # print("Variable matrix is ---",variableMatrix)
+    
     for t in range(K):
         count = 0
         for i in range(n):
