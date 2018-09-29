@@ -16,7 +16,7 @@ def get2Dindex(idx, k):
     j = idx - i*k
     return i,j
 
-def getInput(fileprefix):
+def getInput(fileprefix, mode=0):
 
     # Construct graph from INPUT
     edgelist = []
@@ -25,9 +25,13 @@ def getInput(fileprefix):
         first = infile.readline()
         pars = first.split(" ")
         n = int(pars[0])
-        edgeMatrix = [[False for x in range(n)] for y in range(n)] 
         edges = int(pars[1])
         K = int(pars[2])
+        
+        if (mode == 1):
+            return n, K
+        
+        edgeMatrix = [[False for x in range(n)] for y in range(n)] 
 
         for i in range(edges):
             line = infile.readline()
@@ -219,7 +223,7 @@ def get_out(fileprefix, num_vars):
 # this is running as expected [assignments, i&j order etc]  
 def out(fileprefix):
     
-    edgeList, edgeMatrix, n, K, edges = getInput(fileprefix)
+    n, K = getInput(fileprefix, mode=1)
     
     # print(edgeList, n, K)
 
