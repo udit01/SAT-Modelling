@@ -3,7 +3,7 @@ A full sub-graphs generation program
   and testing automation wrapper
   (selective SAT / UNSAT input graphs)
   for IITD/AI/COL333-671/2018/A3
-  Version : 1.1 (2018-09-26)
+  Version : 1.2 (2018-09-27)
           By Sachin (CSE PhD)
 */
 
@@ -16,7 +16,7 @@ A full sub-graphs generation program
 #include <algorithm>
 
 #define NN 3
-#define KK 2
+#define KK 1
 
 #define EXTN1         ".graph"
 #define EXTN2         ".subgraphs"
@@ -25,7 +25,7 @@ A full sub-graphs generation program
 
 using namespace std;
 
-int N,E,K;
+int N,E,K,K2;
 
 char getch() {
         char buf = 0;
@@ -80,10 +80,17 @@ bool parse(int argc, char* argv[])
                     usage = true;
             break;
 
-            case 'K':
-            case 'k':
+            case 'G':
+            case 'g':
                 K = atoi(argv[i]+3);
                 if(K < KK)
+                    usage = true;
+            break;
+
+            case 'K':
+            case 'k':
+                K2 = atoi(argv[i]+3);
+                if(K2 < KK)
                     usage = true;
             break;
 
@@ -109,19 +116,24 @@ bool parse(int argc, char* argv[])
             break;
         }
     }
-    if(!name.size() || !N || !K)
+    if(K && K2)        ;
+    else if(!K && !K2) usage = true;
+    else if(K)         K2 = K;
+    else               K = K2;
+
+    if(!name.size() || !N)
         usage = true;
-    if(N<=K)
+/*  if(K>E)
     {
-        cout << "N should be greater than K.\n"; 
+        cout << "K should be not be greater than E.\n"; 
         usage = true;
-    }
+    } */
     if(usage)
     {
         cout << "Correct Usage ->\n";
-        cout << argv[0] << " -F=BaseName -N=NumNodes -K=NumSubGraphs [-S=ShellScript] [-U=UNSAT] [-V=Verbose] [-Q=QuietlyQuit]\n";
+        cout << argv[0] << " -F=BaseName -N=NumNodes -G=NumSubGraphs -K=DesiredK [-S=ShellScript] [-U=UNSAT] [-V=Verbose] [-Q=QuietlyQuit]\n";
         cout << "Please give base filename without .graph extn\n";
-        cout << "N >= " << NN << " and K >= " << KK << " and N > K" << endl;
+        cout << "N >= " << NN << " and K (G) >= " << KK << endl;
         cout << "Giving a shell script to perform TAs task will automate testing.\n";
         cout << "If no script is given, user can perform tasks separately and verify.\n";
         cout << "Giving -U=1 (non-zero) enables UNSAT graph, default SAT.\n";
@@ -142,7 +154,7 @@ int main(int argc, char* argv[])
     cout << "  and testing automation wrapper\n";
     cout << "  (selective SAT / UNSAT input graphs)\n";
     cout << "  for IITD/AI/COL333-671/2018/A3\n";
-    cout << "  Version : 1.1 (2018-09-26)\n";
+    cout << "  Version : 1.2 (2018-09-27)\n";
     cout << "          By Sachin (CSE PhD)\n\n";
 
     cout << "Disclaimer:\n";
@@ -227,7 +239,7 @@ ERROR:
                 cout << "This program cannot formulate a graph with given constraints.\n";
                 cout << "Please choose either options -\n";
                 cout << "(1) Try again with bigger N\n";
-                cout << "(2) Try again with smaller K\n";
+                cout << "(2) Try again with smaller G or K\n";
                 cout << "(3) Try with some other program\n";
                 outfile.close();
                 return 1;
@@ -317,7 +329,7 @@ ERROR:
         for(int j=i+1 ; j<=N ; ++j)
             if(G[i][j])
                 E++;
-    outfile << N << " " << E << " " << K << endl;
+    outfile << N << " " << E << " " << K2 << endl;
     for(int i=1 ; i<=N ; ++i)
         for(int j=i+1 ; j<=N ; ++j)
             if(G[i][j])
@@ -333,11 +345,11 @@ ERROR:
     }
     else if(quiet)
     {
-        return 1;
+        return 0;
     }
     else
     {
-        cout << "No test script specified. Switching to interactive mode.\n";
+        cout << "No test script specified. Switching to experminental interactive mode.\n";
         cout << "Pls test as directed by TA.\n";
         cout << "Press q to quit and validate the subgraphs separately.\n";
         cout << "Press Enter after generating subgraph file for validation.\n";
@@ -382,7 +394,6 @@ ERROR:
             return 1;
         }
         infile >> idx >> cnt;
-        //cout << idx << " " << cnt << endl;
 
         if(idx != k+1)
         {
