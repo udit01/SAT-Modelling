@@ -50,6 +50,9 @@ def generate(fileprefix):
     edgeList, edgeMatrix, n, K, edges = getInput(fileprefix)
     # A clause is a list of (list of tuples)
     # Tuples of (Bool, number) where 
+    numVar = n*K + 1
+    
+    
     clause1 = [] 
     
     # variableMatrix[n][K] represents whether node n is present in k'th graph
@@ -65,24 +68,23 @@ def generate(fileprefix):
     
     # print("Printing clause1 ------- " , clause1)
     
-    # DNF TYPE , or of 2 and's (x1^x2) V (x3^x4) V ...
-    clause2 = []
+    # # DNF TYPE , or of 2 and's (x1^x2) V (x3^x4) V ...
+    # clause2 = []
+    # # AN EDGE MUST 
+    # # print("EDGE MATRIX", edgeMatrix)
+    # for i in range(n):
+    #     for j in range(i+1, n):
+    #         if (edgeMatrix[i][j]):
+    #             l = []
+    #             for t in range(K):
+    #                 l.append( [(True, get1Dindex(i, t, K)), (True, get1Dindex(j, t, K))] )
+    #             clause2.extend(l)
 
-    # print("EDGE MATRIX", edgeMatrix)
-    for i in range(n):
-        for j in range(i+1, n):
-            if (edgeMatrix[i][j]):
-                l = []
-                for t in range(K):
-                    l.append( [(True, get1Dindex(i, t, K)), (True, get1Dindex(j, t, K))] )
-                clause2.extend(l)
-
-    # numVar is the index of next free variable
-    numVar = n*K + 1
-    # print('Printing edge matrix', edgeMatrix)
-    # print("Printing clause 2  ------- " , clause2)
-    clause2, numVar = to_cnf(clause2, numVar)
-    # print("Printing clause 2 ---- " , clause2)
+    # # numVar is the index of next free variable
+    # # print('Printing edge matrix', edgeMatrix)
+    # # print("Printing clause 2  ------- " , clause2)
+    # clause2, numVar = to_cnf(clause2, numVar)
+    # # print("Printing clause 2 ---- " , clause2)
 
 
     clause3 = []
@@ -100,7 +102,7 @@ def generate(fileprefix):
     # print("Printing clause3 ------- " , clause3)
     # DNF TYPE , or of 2 and's (x1^x2) V (x3^x4) V ...
     clause4 = []
-
+    # NO SUBGRAPH IS SUBGRAPH OF ANOTHER
     # i and j are subgraphs
     for i in range(K):
         for j in range(K):
@@ -108,19 +110,22 @@ def generate(fileprefix):
                 continue
             l = []
             for node in range(n):
+                # print("PRINTING SG1, SG2, NODE ", i, j, node)
                 l.append([(True, get1Dindex(node, i, K)), (False, get1Dindex(node, j, K))])
             # concat l with clause4
+            l, numVar = to_cnf(l, numVar)
             clause4.extend(l)
 
     # print("Printing clause4 ------ " , clause4)
 
     # numVar is the index of next free variable
-    clause4, numVar = to_cnf(clause4, numVar)
+    # clause4, numVar = to_cnf(clause4, numVar)
     # print("Printing clause4 ------ " , clause4)
+
 
     # Clause 5, we thought it was included in previous constraints ?
     clause5 = []
-
+    # ALL EDGES MUST BE INCLUDED
     for i in range(n):
         for j in range(i+1,n):
             l = []
@@ -132,9 +137,18 @@ def generate(fileprefix):
                 l, numVar = to_cnf(l,numVar)
             clause5.extend(l)
 
+    
+    clause6 = []
+    # NO SUBGRAPH IS EMPTY
+    for i in range(K):
+        l = []
+        for j in range(n):
+            l.append((True, get1Dindex(j, i, K)))
+        clause6.append(l)
     # print("Printing clause 5 ----- ", clause5)
 
-    clause = clause1 + clause2 + clause3 + clause4 + clause5
+    # clause = clause1 + clause2 + clause3 + clause4 + clause5 + clause6
+    clause = clause1 + clause3 + clause4 + clause5 + clause6
     
     # print("Num Var ---- ",numVar)
 
@@ -218,19 +232,29 @@ def out(fileprefix):
 
     # print("Variable matrix is ---",variableMatrix)
     
+    writeString = ""
+
     for t in range(K):
         count = 0
         for i in range(n):
             if(variableMatrix[i][t]):
                 count+=1
-        print("#%d %d\n"%(t+1, count), end="")
+        # print("#%d %d\n"%(t+1, count), end="")
+        writeString += "#%d %d\n" % (t+1, count)
         for i in range(n):
             if(variableMatrix[i][t]):
                 count -= 1
-                print(i+1, end="")
+                writeString += str(i+1) 
+                # print(i+1, end="")
                 if(count > 0):
-                    print(" ", end="")
-        print()
+                    # print(" ", end="")
+                    writeString += " "
+        writeString += "\n"
+    
+    with open(fileprefix+".subgraphs","w") as outfile:
+        outfile.write(writeString)
+        outfile.close()
+    
 
 
 if __name__ == "__main__":
