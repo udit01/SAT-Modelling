@@ -75,7 +75,7 @@ def generate(fileprefix):
                 l = []
                 for t in range(K):
                     l.append( [(True, get1Dindex(i, t, K)), (True, get1Dindex(j, t, K))] )
-                clause2 = clause2 + l
+                clause2.extend(l)
 
     # numVar is the index of next free variable
     numVar = n*K + 1
@@ -94,7 +94,7 @@ def generate(fileprefix):
                 for t in range(K):
                     l.append([(False, get1Dindex(i, t, K)), (False, get1Dindex(j, t, K) )])
             # concat l with clause3
-            clause3 = clause3 + l
+            clause3.extend(l)
     
 
     # print("Printing clause3 ------- " , clause3)
@@ -110,7 +110,7 @@ def generate(fileprefix):
             for node in range(n):
                 l.append([(True, get1Dindex(node, i, K)), (False, get1Dindex(node, j, K))])
             # concat l with clause4
-            clause4 = clause4 + l
+            clause4.extend(l)
 
     # print("Printing clause4 ------ " , clause4)
 
@@ -130,7 +130,7 @@ def generate(fileprefix):
                     # OR of pairwise and
                     l.append( [(True, get1Dindex(i, t, K)), (True, get1Dindex(j, t, K))] )
                 l, numVar = to_cnf(l,numVar)
-            clause5 = clause5 + l
+            clause5.extend(l)
 
     # print("Printing clause 5 ----- ", clause5)
 
@@ -142,22 +142,22 @@ def generate(fileprefix):
 
 def writeSatInput(fileprefix, clause, numVar):
     # 1 to numVar all are varialbes
+    writeString = ""
+    string1 = "p cnf %d %d\n" %(numVar, len(clause))
+    # outfile.write(string1)
+    writeString += string1
+    for exp in clause:
+        st = ""
+        for term in exp:
+            if (not term[0]):
+                st += "-" 
+            # To make the variables 1 indexed
+            st += str(term[1]+1) + " "
+        st += "0\n"
+        writeString += st
+        # outfile.write(st)
     with open(fileprefix+".satinput","w") as outfile:
-        
-        string1 = "p cnf %d %d\n" %(numVar, len(clause))
-        outfile.write(string1)
-
-        for exp in clause:
-            st = ""
-            for term in exp:
-                if (not term[0]):
-                    st += "-" 
-                # To make the variables 1 indexed
-                st += str(term[1]+1) + " "
-            
-            st += "0\n"
-            outfile.write(st)
-
+        outfile.write(writeString)
         outfile.close()
 
 
